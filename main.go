@@ -1,0 +1,29 @@
+package main
+
+import (
+	"fmt"
+	"github.com/vkhichar/assets-manager/config"
+	"github.com/vkhichar/assets-manager/handler"
+	"github.com/vkhichar/assets-manager/repository"
+	"net/http"
+)
+
+func main() {
+	err := config.Init()
+	if err != nil {
+		fmt.Printf("main: error while initialising config: %s", err.Error())
+		return
+	}
+
+	// initialise db connection
+	repository.InitDB()
+
+	handler.InitDependencies()
+	handler.Routes()
+
+	err = http.ListenAndServe(":"+config.GetAppPort(), nil)
+	if err != nil {
+		fmt.Printf("main: error while starting server: %s", err.Error())
+		return
+	}
+}
