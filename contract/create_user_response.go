@@ -1,6 +1,6 @@
 package contract
 
-type RegisterResponse struct {
+type CreateUserResponse struct {
 	ID      int    `json:"id"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`

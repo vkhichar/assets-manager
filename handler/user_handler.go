@@ -63,13 +63,13 @@ func LoginHandler(userService service.UserService) http.HandlerFunc {
 }
 
 //RegisterHandler will handle registration
-func RegisterHandler(userService service.UserService) http.HandlerFunc {
+func CreateUserHandler(userService service.UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Set Content-Type for response
 		w.Header().Set("Content-Type", "application/json")
 
-		var req contract.RegisterRequest
+		var req contract.CreateUserRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			fmt.Printf("handler: error while decoding request for register: %s", err.Error())
@@ -110,7 +110,7 @@ func RegisterHandler(userService service.UserService) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		responseBytes, _ := json.Marshal(contract.RegisterResponse{ID: user.ID, Name: user.Name, Email: user.Email, IsAdmin: user.IsAdmin})
+		responseBytes, _ := json.Marshal(contract.CreateUserResponse{ID: user.ID, Name: user.Name, Email: user.Email, IsAdmin: user.IsAdmin})
 		w.Write(responseBytes)
 		return
 	}

@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-type RegisterRequest struct {
+type CreateUserRequest struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	IsAdmin  bool   `json:"is_admin"`
 }
 
-func (req RegisterRequest) Validate() error {
+func (req CreateUserRequest) Validate() error {
 	if strings.TrimSpace(req.Name) == "" {
 		return errors.New("name is required")
 	}

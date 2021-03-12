@@ -6,5 +6,5 @@ import "net/http"
 func Routes() {
 	http.Handle("/ping", PingHandler())
 	http.Handle("/login", LoginHandler(deps.userService))
-	http.Handle("/user", RegisterHandler(deps.userService))
+	http.Handle("/user", CreateUserHandler(deps.userService))
 }
