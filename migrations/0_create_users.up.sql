@@ -1,7 +1,11 @@
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  name varchar(100) NOT NULL,
-  email varchar(100) NOT NULL,
-  password varchar(100) NOT NULL,
-  is_admin boolean NOT NULL
+CREATE TABLE users(
+
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(50) NOT NULL, 
+	email VARCHAR(50) UNIQUE NOT NULL,
+	password VARCHAR(50) NOT NULL,
+	is_admin BOOLEAN NOT NULL,
+	created_at TIMESTAMP DEFAULT NOW(),
+	updated_at  TIMESTAMP
+ 
 );
