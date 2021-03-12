@@ -3,14 +3,17 @@ package service
 import (
 	"context"
 	"errors"
+
 	"github.com/vkhichar/asset-management/domain"
 	"github.com/vkhichar/asset-management/repository"
 )
 
 var ErrInvalidEmailPassword = errors.New("invalid email or password")
+var ErrDuplicateEmail = errors.New("this email is already registered")
 
 type UserService interface {
 	Login(ctx context.Context, email, password string) (user *domain.User, token string, err error)
+	Register(ctx context.Context, name, email, password string, isAdmin bool) (user *domain.User, err error)
 }
 
 type userService struct {
@@ -46,4 +49,14 @@ func (service *userService) Login(ctx context.Context, email, password string) (
 	}
 
 	return user, token, nil
+}
+
+func (service *userService) Register(ctx context.Context, name, email, password string, isAdmin bool) (*domain.User, error) {
+	user, err := service.userRepo.InsertUser(ctx, name, email, password, isAdmin)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

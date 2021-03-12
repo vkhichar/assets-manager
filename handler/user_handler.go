@@ -3,11 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/vkhichar/asset-management/contract"
 	"github.com/vkhichar/asset-management/service"
-	"net/http"
 )
 
+//LoginHandler will manage user login
 func LoginHandler(userService service.UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -57,5 +59,59 @@ func LoginHandler(userService service.UserService) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		responseBytes, _ := json.Marshal(contract.LoginResponse{IsAdmin: user.IsAdmin, Token: token})
 		w.Write(responseBytes)
+	}
+}
+
+//RegisterHandler will handle registration
+func RegisterHandler(userService service.UserService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Set Content-Type for response
+		w.Header().Set("Content-Type", "application/json")
+
+		var req contract.RegisterRequest
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			fmt.Printf("handler: error while decoding request for register: %s", err.Error())
+
+			w.WriteHeader(http.StatusBadRequest)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "invalid request"})
+			w.Write(responseBytes)
+			return
+		}
+
+		err = req.Validate()
+		if err != nil {
+			fmt.Printf("handler: empty filed provided")
+
+			w.WriteHeader(http.StatusBadRequest)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: err.Error()})
+			w.Write(responseBytes)
+			return
+		}
+
+		user, err := userService.Register(r.Context(), req.Name, req.Email, req.Password, req.IsAdmin)
+		if err == service.ErrDuplicateEmail {
+			fmt.Printf("handler: email already exist: %s", req.Email)
+
+			w.WriteHeader(http.StatusOK)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: err.Error()})
+			w.Write(responseBytes)
+			return
+		}
+
+		if err != nil {
+			fmt.Printf("handler: error while registering for email: %s, error: %s", req.Email, err.Error())
+
+			w.WriteHeader(http.StatusInternalServerError)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "something went wrong"})
+			w.Write(responseBytes)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		responseBytes, _ := json.Marshal(contract.RegisterResponse{ID: user.ID, Name: user.Name, Email: user.Email, IsAdmin: user.IsAdmin})
+		w.Write(responseBytes)
+		return
 	}
 }
