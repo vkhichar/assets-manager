@@ -3,14 +3,11 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/vkhichar/assets-manager/domain"
 )
-
-var ErrDuplicateEmail = errors.New("this email is already registered")
 
 const (
 	getUserByEmailQuery = "SELECT id, name, email, password, is_admin FROM users WHERE email= $1"
@@ -56,7 +53,7 @@ func (repo *userRepo) InsertUser(ctx context.Context, name, email, password stri
 	err := repo.db.Get(&user, getUserByEmailQuery, email)
 
 	if err == nil {
-		return nil, ErrDuplicateEmail
+		return nil, nil
 	}
 	_, err = repo.db.Exec(registerUser, name, email, password, isAdmin)
 
@@ -73,6 +70,12 @@ func (repo *userRepo) GetUser(ctx context.Context, id int) (*domain.User, error)
 	var user domain.User
 
 	err := repo.db.Get(&user, getUserByID, id)
+
+	if err == sql.ErrNoRows {
+		fmt.Printf("repository: couldn't find user for id: %d", id)
+
+		return nil, nil
+	}
 
 	if err != nil {
 		return nil, err

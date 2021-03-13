@@ -10,6 +10,7 @@ import (
 
 var ErrInvalidEmailPassword = errors.New("invalid email or password")
 var ErrDuplicateEmail = errors.New("this email is already registered")
+var ErrNoSqlRow = errors.New("no value for this id")
 
 type UserService interface {
 	Login(ctx context.Context, email, password string) (user *domain.User, token string, err error)
@@ -59,6 +60,10 @@ func (service *userService) Register(ctx context.Context, name, email, password 
 		return nil, err
 	}
 
+	if user == nil {
+		return nil, ErrDuplicateEmail
+	}
+
 	return user, nil
 }
 
@@ -67,6 +72,10 @@ func (service *userService) GetUser(ctx context.Context, id int) (*domain.User, 
 
 	if err != nil {
 		return nil, err
+	}
+
+	if user == nil {
+		return nil, ErrNoSqlRow
 	}
 
 	return user, nil

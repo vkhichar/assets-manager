@@ -91,7 +91,7 @@ func CreateUserHandler(userService service.UserService) http.HandlerFunc {
 		}
 
 		user, err := userService.Register(r.Context(), req.Name, req.Email, req.Password, req.IsAdmin)
-		if err.Error() == service.ErrDuplicateEmail.Error() {
+		if err == service.ErrDuplicateEmail {
 			fmt.Printf("handler: email already exist: %s", req.Email)
 
 			w.WriteHeader(http.StatusOK)
@@ -129,10 +129,18 @@ func GetUser(userService service.UserService) http.HandlerFunc {
 		id, _ := strconv.Atoi(query)
 		user, err := userService.GetUser(r.Context(), id)
 
-		if err != nil {
+		if err == service.ErrNoSqlRow {
 			fmt.Printf("handler: No value for id : %d, error: %s", id, err.Error())
 			w.WriteHeader(http.StatusOK)
 			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "No data present for this id"})
+			w.Write(responseBytes)
+			return
+		}
+
+		if err != nil {
+			fmt.Printf("handler:error while fetching data")
+			w.WriteHeader(http.StatusInternalServerError)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "something went wrong"})
 			w.Write(responseBytes)
 			return
 		}
