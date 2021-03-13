@@ -14,6 +14,7 @@ var ErrDuplicateEmail = errors.New("this email is already registered")
 type UserService interface {
 	Login(ctx context.Context, email, password string) (user *domain.User, token string, err error)
 	Register(ctx context.Context, name, email, password string, isAdmin bool) (user *domain.User, err error)
+	GetUser(ctx context.Context, id int) (*domain.User, error)
 }
 
 type userService struct {
@@ -53,6 +54,16 @@ func (service *userService) Login(ctx context.Context, email, password string) (
 
 func (service *userService) Register(ctx context.Context, name, email, password string, isAdmin bool) (*domain.User, error) {
 	user, err := service.userRepo.InsertUser(ctx, name, email, password, isAdmin)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (service *userService) GetUser(ctx context.Context, id int) (*domain.User, error) {
+	user, err := service.userRepo.GetUser(ctx, id)
 
 	if err != nil {
 		return nil, err

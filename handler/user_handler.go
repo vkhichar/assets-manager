@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/service"
@@ -111,6 +112,33 @@ func CreateUserHandler(userService service.UserService) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		responseBytes, _ := json.Marshal(contract.CreateUserResponse{ID: user.ID, Name: user.Name, Email: user.Email, IsAdmin: user.IsAdmin})
 		w.Write(responseBytes)
-		return
+	}
+}
+
+func GetUser(userService service.UserService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query().Get("id")
+		if len(query) == 0 {
+			fmt.Printf("handler: no id provided")
+			w.WriteHeader(http.StatusBadRequest)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "No user id is provided"})
+			w.Write(responseBytes)
+			return
+		}
+
+		id, _ := strconv.Atoi(query)
+		user, err := userService.GetUser(r.Context(), id)
+
+		if err != nil {
+			fmt.Printf("handler: No value for id : %d, error: %s", id, err.Error())
+			w.WriteHeader(http.StatusOK)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "No data present for this id"})
+			w.Write(responseBytes)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		responseBytes, _ := json.Marshal(contract.GetUserResponse{Name: user.Name, Email: user.Email, IsAdmin: user.IsAdmin})
+		w.Write(responseBytes)
 	}
 }
