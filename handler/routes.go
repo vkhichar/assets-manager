@@ -1,10 +1,14 @@
 package handler
 
-import "net/http"
+import (
+	"net/http"
+	"github.com/gorilla/mux"
+)
 
-func Routes() {
-	http.Handle("/ping", PingHandler())
-	http.Handle("/login", LoginHandler(deps.userService))
-	http.Handle("/user", CreateUserHandler(deps.userService))
-	http.Handle("/getUser", GetUser(deps.userService))
+func Routes() *mux.Router {
+	router := mux.NewRouter()
+	router.Handle("/ping", PingHandler())
+	router.Handle("/login", LoginHandler(deps.userService))
+	router.Handle("/users", CreateUserHandler(deps.userService).Method("POST"))
+	router.Handle("/users", GetUser(deps.userService).Method("GET"))
 }
