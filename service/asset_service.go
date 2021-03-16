@@ -8,7 +8,7 @@ import (
 	"github.com/vkhichar/assets-manager/repository"
 )
 
-var ErrInvalidId = errors.New("invalid email or password")
+var ErrInvalidId = errors.New("Invalid ID")
 
 type AssetService interface {
 	CreateAsset(ctx context.Context, asset *domain.Asset) (*domain.Asset, error)

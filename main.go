@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/vkhichar/assets-manager/config"
 	"github.com/vkhichar/assets-manager/handler"
 	"github.com/vkhichar/assets-manager/repository"
-	"net/http"
 )
 
 func main() {
