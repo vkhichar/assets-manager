@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/vkhichar/assets-manager/config"
 	"github.com/vkhichar/assets-manager/handler"
 	"github.com/vkhichar/assets-manager/repository"
-	"net/http"
 )
 
 func main() {
@@ -19,9 +20,9 @@ func main() {
 	repository.InitDB()
 
 	handler.InitDependencies()
-	handler.Routes()
+	//	handler.Routes()
 
-	err = http.ListenAndServe(":"+config.GetAppPort(), nil)
+	err = http.ListenAndServe(":"+config.GetAppPort(), handler.Routes())
 	if err != nil {
 		fmt.Printf("main: error while starting server: %s", err.Error())
 		return
