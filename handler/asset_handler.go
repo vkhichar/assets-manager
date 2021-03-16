@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
 	"github.com/vkhichar/assets-manager/service"
@@ -73,8 +74,8 @@ func FindAssetHandler(assetService service.AssetService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//Set content type for response
 		w.Header().Set("Content-Type", "application/json")
-
-		id, err := strconv.Atoi(r.FormValue("id"))
+		vars := mux.Vars(r)
+		id, err := strconv.Atoi(vars["id"])
 
 		if err != nil {
 			fmt.Printf("handler: invalid request")
@@ -89,7 +90,7 @@ func FindAssetHandler(assetService service.AssetService) http.HandlerFunc {
 		if err == service.ErrInvalidId {
 			fmt.Printf("handler: invalid id,  Id: %v", id)
 
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusNotFound)
 			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "no asset with such id found"})
 			w.Write(responseBytes)
 			return
