@@ -56,12 +56,12 @@ func (service *userService) Login(ctx context.Context, email, password string) (
 func (service *userService) Register(ctx context.Context, name, email, password string, isAdmin bool) (*domain.User, error) {
 	user, err := service.userRepo.InsertUser(ctx, name, email, password, isAdmin)
 
-	if err != nil {
-		return nil, err
+	if err != nil && err.Error() == ErrDuplicateEmail.Error() {
+		return nil, ErrDuplicateEmail
 	}
 
-	if user == nil {
-		return nil, ErrDuplicateEmail
+	if err != nil {
+		return nil, err
 	}
 
 	return user, nil
@@ -70,12 +70,12 @@ func (service *userService) Register(ctx context.Context, name, email, password 
 func (service *userService) GetUser(ctx context.Context, id int) (*domain.User, error) {
 	user, err := service.userRepo.GetUser(ctx, id)
 
-	if err != nil {
-		return nil, err
+	if err != nil && err.Error() == ErrNoSqlRow.Error() {
+		return nil, ErrNoSqlRow
 	}
 
-	if user == nil {
-		return nil, ErrNoSqlRow
+	if err != nil {
+		return nil, err
 	}
 
 	return user, nil
