@@ -49,7 +49,7 @@ func FindAssetHandler(service service.AssetService) http.HandlerFunc {
 			return
 		}
 		//success
-		responseBytes, err := json.Marshal(contract.FindAssetResponse{Id: asset.Id, Name: asset.Name, Category: asset.Category, Specification: *asset.Specification, InitCost: asset.InitCost, Status: asset.Status})
+		responseBytes, err := json.Marshal(contract.FindAssetResponse{Id: asset.Id, Name: asset.Name, Category: asset.Category, Specification: asset.Specification, InitCost: asset.InitCost, Status: asset.Status})
 		rw.WriteHeader(http.StatusOK)
 		rw.Write(responseBytes)
 	}
