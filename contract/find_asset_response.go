@@ -6,7 +6,7 @@ type FindAssetResponse struct {
 	Id            int             `json:"id"`
 	Name          string          `json:"name"`
 	Category      string          `json:"category"`
-	Specification json.RawMessage `json:"specification"`
+	Specification *json.RawMessage `json:"specification"`
 	InitCost      float64         `json:"init_cost"`
 	Status        int             `json:"status"`
 }
