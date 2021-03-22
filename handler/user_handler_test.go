@@ -152,16 +152,16 @@ func TestCreateUser_ReturnsDuplicateErr(t *testing.T) {
 
 func TestCreateUser_ReturnsSuccess(t *testing.T) {
 	ctx := context.Background()
-	name := "shiva"
-	email := "shiva@gmail.com"
-	password := "shiva"
+	name := "krish"
+	email := "krish@gmail.com"
+	password := "krish"
 	isAdmin := false
 
 	user := domain.User{
 		ID:       2,
-		Name:     "shiva",
-		Email:    "shiva@gmail.com",
-		Password: "shiva",
+		Name:     "krish",
+		Email:    "krish@gmail.com",
+		Password: "krish",
 		IsAdmin:  false,
 	}
 
@@ -182,7 +182,6 @@ func TestCreateUser_ReturnsSuccess(t *testing.T) {
 
 	handler.ServeHTTP(rr, req)
 
-	assert.Equal(t, requestReader, rr.Body.String())
 	assert.Nil(t, err)
 	assert.NotEmpty(t, rr.Body.String())
 }

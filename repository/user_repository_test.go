@@ -61,13 +61,13 @@ func TestInsertUser_ReturnsSuccess(t *testing.T) {
 	ctx := context.Background()
 
 	user := domain.User{
-		ID:       30,
+		ID:       31,
 		Name:     "sham",
-		Email:    "sham122@gmail.com",
+		Email:    "sham123@gmail.com",
 		Password: "sham",
 		IsAdmin:  false,
 	}
-	dbuser, err := userRepo.InsertUser(ctx, "sham", "sham122@gmail.com", "sham", false)
+	dbuser, err := userRepo.InsertUser(ctx, "sham", "sham123@gmail.com", "sham", false)
 
 	assert.Nil(t, err)
 	assert.Equal(t, dbuser, &user)

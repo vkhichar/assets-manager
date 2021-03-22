@@ -91,7 +91,7 @@ func CreateUserHandler(userService service.UserService) http.HandlerFunc {
 		}
 
 		user, err := userService.Register(r.Context(), req.Name, req.Email, req.Password, req.IsAdmin)
-		if err.Error() == service.ErrDuplicateEmail.Error() {
+		if err != nil && err.Error() == service.ErrDuplicateEmail.Error() {
 			fmt.Printf("handler: email already exist: %s", req.Email)
 
 			w.WriteHeader(http.StatusConflict)
