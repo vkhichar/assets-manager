@@ -11,9 +11,9 @@ import (
 
 type AssetService interface {
 	FindAsset(context.Context, int) (*domain.Asset, error)
-	GetAssets() (*[]domain.Asset, error)
+	GetAssets() ([]domain.Asset, error)
 	UpdateAsset(ctx context.Context, asset *contract.UpadateAssetRequest) (*domain.Asset, error)
-	DeleteService(ctx context.Context, id int) (*domain.Asset, error)
+	DeleteAsset(ctx context.Context, id int) (*domain.Asset, error)
 }
 
 type assetService struct {
@@ -42,7 +42,7 @@ func (service *assetService) FindAsset(ctx context.Context, id int) (*domain.Ass
 	return asset, nil
 }
 
-func (service *assetService) GetAssets() (*[]domain.Asset, error) {
+func (service *assetService) GetAssets() ([]domain.Asset, error) {
 	assets, err := service.assetRepo.GetAllAssets()
 
 	if err != nil {
@@ -62,16 +62,14 @@ func (service *assetService) UpdateAsset(ctx context.Context, asset *contract.Up
 	return assets, nil
 }
 
-func (service *assetService) DeleteService(ctx context.Context, id int) (*domain.Asset, error) {
+func (service *assetService) DeleteAsset(ctx context.Context, id int) (*domain.Asset, error) {
 
 	assets, err := service.assetRepo.DeleteAsset(ctx, id)
 
 	if err != nil {
 		return nil, err
 	}
-	if assets == nil {
-		return nil, errors.New("cannot find user")
-	}
+
 	return assets, nil
 
 }

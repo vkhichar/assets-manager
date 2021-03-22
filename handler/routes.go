@@ -14,8 +14,8 @@ func Routes() *mux.Router {
 
 	//asset routes
 	router.Handle("/asset/find", FindAssetHandler(deps.assetService)).Methods("GET")
-	router.Handle("/asset/all", GetAllAssets(deps.assetService)).Methods("GET")
-	router.Handle("/asset/update", UpdateAssets(deps.assetService)).Methods("PUT")
-	router.Handle("/asset/delete", DeleteAssets(deps.assetService)).Methods("DELETE")
+	router.Handle("/assets/all", GetAllAssets(deps.assetService)).Methods("GET")
+	router.Handle("/assets/update", UpdateAssets(deps.assetService)).Methods("PUT")
+	router.Handle("/assets/delete", DeleteAssets(deps.assetService)).Methods("DELETE")
 	return router
 }

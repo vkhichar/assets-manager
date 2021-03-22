@@ -18,7 +18,7 @@ type UpadateAssetRequest struct {
 
 func (req UpadateAssetRequest) Validate() error {
 	if req.Id < 0 {
-		return errors.New("id is invalid")
+		return errors.New("invalid id")
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return errors.New("name is required")

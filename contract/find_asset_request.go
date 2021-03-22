@@ -10,7 +10,7 @@ type FindAssetRequest struct {
 
 func (req *FindAssetRequest) Validate() error {
 
-	if req.Id < 0 || req.Id > 99999 {
+	if req.Id < 0 {
 		return errors.New("invalid id ")
 	}
 	return nil
