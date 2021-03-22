@@ -78,9 +78,9 @@ func FindAssetHandler(assetService service.AssetService) http.HandlerFunc {
 		id, err := strconv.Atoi(vars["id"])
 
 		if err != nil {
-			fmt.Printf("handler: invalid request")
+			fmt.Printf("handler: invalid request,  %s", err.Error())
 			w.WriteHeader(http.StatusBadRequest)
-			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "Invalid Id"})
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "invalid id"})
 			w.Write(responseBytes)
 			return
 		}
