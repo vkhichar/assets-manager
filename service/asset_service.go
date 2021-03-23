@@ -9,7 +9,10 @@ import (
 	"github.com/vkhichar/assets-manager/repository"
 )
 
+var ErrInvalidId = errors.New("Invalid ID")
+
 type AssetService interface {
+	CreateAsset(ctx context.Context, asset *domain.Asset) (*domain.Asset, error)
 	FindAsset(context.Context, int) (*domain.Asset, error)
 	GetAssets() ([]domain.Asset, error)
 	UpdateAsset(ctx context.Context, asset *contract.UpadateAssetRequest) (*domain.Asset, error)
@@ -58,8 +61,16 @@ func (service *assetService) UpdateAsset(ctx context.Context, asset *contract.Up
 	if err != nil {
 		return nil, err
 	}
-
 	return assets, nil
+
+}
+
+func (service *assetService) CreateAsset(ctx context.Context, asset *domain.Asset) (*domain.Asset, error) {
+	asset, err := service.assetRepo.CreateAsset(ctx, asset)
+	if err != nil {
+		return nil, err
+	}
+	return asset, nil
 }
 
 func (service *assetService) DeleteAsset(ctx context.Context, id int) (*domain.Asset, error) {

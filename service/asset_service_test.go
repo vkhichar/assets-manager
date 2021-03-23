@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
-	mocks "github.com/vkhichar/assets-manager/repository/mock"
+	mockRepo "github.com/vkhichar/assets-manager/repository/mocks"
 	"github.com/vkhichar/assets-manager/service"
 )
 
@@ -18,7 +18,7 @@ func TestFindAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
 	id := 100
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 
 	mockAssetRepo.On("FindAsset", ctx, id).Return(nil, errors.New("something went wrong"))
 
@@ -41,7 +41,7 @@ func TestFindAsset_When_ReturnsAsset(t *testing.T) {
 		InitCost: 100,
 		Status:   0,
 	}
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 
 	mockAssetRepo.On("FindAsset", ctx, id).Return(asset, nil)
 
@@ -55,7 +55,7 @@ func TestFindAsset_When_ReturnsAsset(t *testing.T) {
 
 func TestGetAssets__When_ReturnsError(t *testing.T) {
 
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 
 	mockAssetRepo.On("GetAllAssets").Return(nil, errors.New("something went wrong"))
 	assetService := service.NewAssetService(mockAssetRepo)
@@ -74,7 +74,7 @@ func TestGetAssets_When_ReturnsAssets(t *testing.T) {
 		assets[0] = domain.Asset{Id: i, Name: fmt.Sprintf("test_user%d", i), Category: "testing", InitCost: 0, Status: 0}
 	}
 
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 	mockAssetRepo.On("GetAllAssets").Return(assets, nil)
 	assetService := service.NewAssetService(mockAssetRepo)
 	assets_ret, err := assetService.GetAssets()
@@ -88,7 +88,7 @@ func TestUpdateAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
 
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 	var asset_req *contract.UpadateAssetRequest
 
 	mockAssetRepo.On("UpdateAsset", ctx, asset_req).Return(nil, errors.New("something went wrong"))
@@ -104,7 +104,7 @@ func TestUpdateAsset_When_ReturnsAsset(t *testing.T) {
 
 	ctx := context.Background()
 
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 	asset := &domain.Asset{Id: 1, Name: "test_user", Category: "testing", InitCost: 0, Status: 0}
 	var asset_req *contract.UpadateAssetRequest
 	mockAssetRepo.On("UpdateAsset", ctx, asset_req).Return(asset, nil)
@@ -122,7 +122,7 @@ func TestDeleteAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
 	id := 100
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 
 	mockAssetRepo.On("DeleteAsset", ctx, id).Return(nil, errors.New("something went wrong"))
 
@@ -147,7 +147,7 @@ func TestDeleteAsset_When_ReturnsAsset(t *testing.T) {
 		InitCost:      100,
 		Status:        0,
 	}
-	mockAssetRepo := &mocks.MockRepo{}
+	mockAssetRepo := &mockRepo.MockRepo{}
 
 	mockAssetRepo.On("DeleteAsset", ctx, id).Return(asset, nil)
 
@@ -156,5 +156,84 @@ func TestDeleteAsset_When_ReturnsAsset(t *testing.T) {
 
 	assert.Equal(t, asset, asset_ret)
 	assert.Nil(t, err)
+}
+func TestAssetService_CreateAsset_When_CreateAssetReturnsError(t *testing.T) {
+	ctx := context.Background()
+
+	obj := domain.Asset{
+		Id:            655,
+		Status:        0,
+		Category:      "Laptops",
+		Specification: &json.RawMessage{},
+	}
+
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
+
+	mockAssetRepo.On("CreateAsset", ctx, &obj).Return(nil, errors.New("some db error"))
+
+	assetService := service.NewAssetService(mockAssetRepo)
+	asset, err := assetService.CreateAsset(ctx, &obj)
+
+	assert.Error(t, err)
+	assert.Nil(t, asset)
+}
+
+func TestAssetService_CreateAsset_Success(t *testing.T) {
+	ctx := context.Background()
+
+	obj := domain.Asset{
+		Id:            1,
+		Name:          "Ideapad",
+		Category:      "Laptop",
+		Status:        0,
+		InitCost:      50000,
+		Specification: &json.RawMessage{},
+	}
+
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
+
+	mockAssetRepo.On("CreateAsset", ctx, &obj).Return(&obj, nil)
+
+	assetService := service.NewAssetService(mockAssetRepo)
+	dbAsset, err := assetService.CreateAsset(ctx, &obj)
+
+	assert.NoError(t, err)
+	assert.Equal(t, &obj, dbAsset)
+}
+
+func TestAssetService_FindAsset_Returns_error(t *testing.T) {
+	ctx := context.Background()
+	id := 1
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
+	mockAssetRepo.On("FindAsset", ctx, id).Return(nil, errors.New("invalid id"))
+	assetService := service.NewAssetService(mockAssetRepo)
+
+	asset, err := assetService.FindAsset(ctx, id)
+
+	assert.Error(t, err)
+	assert.Equal(t, "invalid id", err.Error())
+	assert.Nil(t, asset)
+
+}
+
+func TestAssetService_FindAsset_Returns_Success(t *testing.T) {
+	ctx := context.Background()
+	obj := domain.Asset{
+		ID:            1,
+		Name:          "Ideapad",
+		Category:      "Laptop",
+		Status:        0,
+		InitCost:      50000,
+		Specification: &json.RawMessage{},
+	}
+	id := 1
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
+	mockAssetRepo.On("FindAsset", ctx, id).Return(&obj, nil)
+	assetService := service.NewAssetService(mockAssetRepo)
+
+	asset, err := assetService.FindAsset(ctx, id)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, asset)
 
 }

@@ -19,11 +19,17 @@ const (
 )
 
 type AssetRepository interface {
-	FindAsset(context context.Context, id int) (*domain.Asset, error)
+	CreateAsset(ctx context.Context, asset *domain.Asset) (*domain.Asset, error)
+	FindAsset(ctx context.Context, id int) (*domain.Asset, error)
 	GetAllAssets() ([]domain.Asset, error)
 	UpdateAsset(ctx context.Context, asset *contract.UpadateAssetRequest) (*domain.Asset, error)
 	DeleteAsset(ctx context.Context, id int) (*domain.Asset, error)
 }
+
+const (
+	createNewAssetQuery = `INSERT INTO assets(name,category,specification,init_cost,status) values($1,$2,$3,$4,$5) RETURNING id`
+	getAssetByIdQuery   = `SELECT * FROM assets WHERE id=$1`
+)
 
 type assetRepo struct {
 	db *sqlx.DB
@@ -87,9 +93,17 @@ func (repo *assetRepo) DeleteAsset(ctx context.Context, id int) (*domain.Asset, 
 	}
 	_, err = repo.db.Exec(DeleteAssetQuery, id)
 
+	return asset, nil
+}
+
+func (repo *assetRepo) CreateAsset(ctx context.Context, asset *domain.Asset) (*domain.Asset, error) {
+	id := 0
+	err := repo.db.QueryRow(createNewAssetQuery, asset.Name, asset.Category, asset.Specification, asset.InitCost, 0).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
+	var returnAsset domain.Asset
+	err = repo.db.Get(&returnAsset, getAssetByIdQuery, id)
 
-	return asset, nil
+	return &returnAsset, nil
 }

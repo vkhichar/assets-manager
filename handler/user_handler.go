@@ -85,17 +85,17 @@ func CreateUserHandler(userService service.UserService) http.HandlerFunc {
 			fmt.Printf("handler: empty filed provided")
 
 			w.WriteHeader(http.StatusBadRequest)
-			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: err.Error()})
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "Empty field provided"})
 			w.Write(responseBytes)
 			return
 		}
 
 		user, err := userService.Register(r.Context(), req.Name, req.Email, req.Password, req.IsAdmin)
-		if err == service.ErrDuplicateEmail {
+		if err != nil && err.Error() == service.ErrDuplicateEmail.Error() {
 			fmt.Printf("handler: email already exist: %s", req.Email)
 
-			w.WriteHeader(http.StatusOK)
-			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: err.Error()})
+			w.WriteHeader(http.StatusConflict)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "email already exist"})
 			w.Write(responseBytes)
 			return
 		}
@@ -129,7 +129,7 @@ func GetUser(userService service.UserService) http.HandlerFunc {
 		id, _ := strconv.Atoi(query)
 		user, err := userService.GetUser(r.Context(), id)
 
-		if err == service.ErrNoSqlRow {
+		if err.Error() == service.ErrNoSqlRow.Error() {
 			fmt.Printf("handler: No value for id : %d, error: %s", id, err.Error())
 			w.WriteHeader(http.StatusOK)
 			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "No data present for this id"})
