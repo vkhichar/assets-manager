@@ -19,7 +19,7 @@ func TestGetUser_ReturnErrNoSqlRow(t *testing.T) {
 
 	mockUserRepo.On("GetUser", ctx, id).Return(nil, errors.New("no value for this id"))
 
-	userService := service.NewUserService(mockUserRepo, nil)
+	userService := service.NewUserService(mockUserRepo, nil, nil)
 
 	user, err := userService.GetUser(ctx, id)
 
@@ -36,7 +36,7 @@ func TestGetUser_ReturnError(t *testing.T) {
 
 	mockUserRepo.On("GetUser", ctx, id).Return(nil, errors.New("some db error"))
 
-	userService := service.NewUserService(mockUserRepo, nil)
+	userService := service.NewUserService(mockUserRepo, nil, nil)
 
 	user, err := userService.GetUser(ctx, id)
 
@@ -60,7 +60,7 @@ func TestGetUser_ReturnSuccess(t *testing.T) {
 
 	mockUserRepo.On("GetUser", ctx, id).Return(&user, nil)
 
-	userService := service.NewUserService(mockUserRepo, nil)
+	userService := service.NewUserService(mockUserRepo, nil, nil)
 
 	dbuser, err := userService.GetUser(ctx, id)
 
@@ -78,7 +78,7 @@ func TestInsertUser_ReturnErrDuplicateEmail(t *testing.T) {
 	mockUserRepo := &mock.MockUserRepo{}
 
 	mockUserRepo.On("InsertUser", ctx, name, email, password, isAdmin).Return(nil, errors.New("this email is already registered"))
-	userService := service.NewUserService(mockUserRepo, nil)
+	userService := service.NewUserService(mockUserRepo, nil, nil)
 
 	dbuser, err := userService.Register(ctx, name, email, password, isAdmin)
 
@@ -97,7 +97,7 @@ func TestInsertUser_ReturnError(t *testing.T) {
 	mockUserRepo := &mock.MockUserRepo{}
 
 	mockUserRepo.On("InsertUser", ctx, name, email, password, isAdmin).Return(nil, errors.New("some db error"))
-	userService := service.NewUserService(mockUserRepo, nil)
+	userService := service.NewUserService(mockUserRepo, nil, nil)
 
 	dbuser, err := userService.Register(ctx, name, email, password, isAdmin)
 
@@ -124,7 +124,7 @@ func TestInsertUser_ReturnSuccess(t *testing.T) {
 	mockUserRepo := &mock.MockUserRepo{}
 
 	mockUserRepo.On("InsertUser", ctx, name, email, password, isAdmin).Return(&user, nil)
-	userService := service.NewUserService(mockUserRepo, nil)
+	userService := service.NewUserService(mockUserRepo, nil, nil)
 
 	dbuser, err := userService.Register(ctx, name, email, password, isAdmin)
 

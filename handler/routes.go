@@ -10,6 +10,7 @@ func Routes() *mux.Router {
 	router.Handle("/login", LoginHandler(deps.userService))
 	router.Handle("/users", CreateUserHandler(deps.userService)).Methods("POST")
 	router.Handle("/users", GetUser(deps.userService)).Methods("GET")
+	router.Handle("/users/{id}", UpdateUserHandler(deps.userService)).Methods("PUT")
 	router.Handle("/assets", CreateAssetHandler(deps.assetService)).Methods("POST")
 	router.Handle("/assets/{id}", FindAssetHandler(deps.assetService)).Methods("GET")
 

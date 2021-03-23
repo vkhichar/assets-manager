@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/service"
 )
@@ -147,6 +148,62 @@ func GetUser(userService service.UserService) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusOK)
 		responseBytes, _ := json.Marshal(contract.GetUserResponse{Name: user.Name, Email: user.Email, IsAdmin: user.IsAdmin})
+		w.Write(responseBytes)
+	}
+}
+
+func UpdateUserHandler(userServce service.UserService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		var req contract.CreateUserRequest
+
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			fmt.Printf("handler: error while decoding request for update: %s", err.Error())
+
+			w.WriteHeader(http.StatusBadRequest)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "invalid request"})
+			w.Write(responseBytes)
+			return
+		}
+
+		err = req.ValidateUpdate()
+		if err != nil {
+			fmt.Printf("handler: empty filed provided")
+
+			w.WriteHeader(http.StatusBadRequest)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "Empty field provided"})
+			w.Write(responseBytes)
+			return
+		}
+		idStrr := mux.Vars(r)["id"]
+		id, err := strconv.Atoi(idStrr)
+		if err != nil {
+			fmt.Printf("handler: no id provided %s", idStrr)
+			w.WriteHeader(http.StatusBadRequest)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "No user id is provided"})
+			w.Write(responseBytes)
+			return
+		}
+		val := contract.UpdateUserRequest{
+			Name:     req.Name,
+			Email:    req.Email,
+			Password: req.Password,
+			IsAdmin:  req.IsAdmin,
+		}
+		user, err := userServce.Update(r.Context(), id, val)
+		if err != nil {
+			fmt.Printf("handler: error while registering for email: %s, error: %s", req.Email, err.Error())
+
+			w.WriteHeader(http.StatusInternalServerError)
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "something went wrong"})
+			w.Write(responseBytes)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		responseBytes, _ := json.Marshal(contract.CreateUserResponse{ID: user.ID, Name: user.Name, Email: user.Email, IsAdmin: user.IsAdmin})
 		w.Write(responseBytes)
 	}
 }
