@@ -29,7 +29,39 @@ func TestDbConnection(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
+	ctx := context.Background()
+	var assetExpected domain.Asset
+	spec := json.RawMessage([]byte(`{"ram":"4GB","brand":"acer"}`))
 
+	dummy := &domain.Asset{
+		Name:          "Acer-255",
+		Category:      "Laptops",
+		InitCost:      50000,
+		Specification: &spec,
+	}
+
+	config.Init()
+	repository.InitDB()
+	db := repository.GetDB()
+
+	//	tx := db.MustBegin()
+	//	tx.MustExec("TRUNCATE TABLE assets RESTART IDENTITY;")
+	//	tx.Commit()
+
+	assetRepo := repository.NewAssetRepository()
+
+	asset, err := assetRepo.CreateAsset(ctx, dummy)
+
+	fmt.Println()
+	db.Get(&assetExpected, "SELECT * FROM assets WHERE id = $1", asset.Id)
+	fmt.Println(assetExpected)
+
+	assert.Equal(t, &assetExpected, asset)
+	assert.Nil(t, err)
+
+	fmt.Println()
+}
 func TestFindAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
@@ -49,7 +81,7 @@ func TestFindAsset_When_ReturnsAsset(t *testing.T) {
 	ctx := context.Background()
 
 	assetRepo := repository.NewAssetRepository()
-	asset, err := assetRepo.FindAsset(ctx, 4)
+	asset, err := assetRepo.FindAsset(ctx, 1)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, asset)
@@ -90,7 +122,7 @@ func TestUpdateAssets_When_ReturnsAsset(t *testing.T) {
 	ctx := context.Background()
 
 	asset_request := &contract.UpadateAssetRequest{
-		Id:       4,
+		Id:       1,
 		Name:     "hp",
 		Category: "laptop",
 		InitCost: 1000,
@@ -123,43 +155,10 @@ func TestDeleteAssets_When_ReturnsAsset(t *testing.T) {
 	ctx := context.Background()
 	assetRepo := repository.NewAssetRepository()
 
-	asset, err := assetRepo.DeleteAsset(ctx, 4)
+	asset, err := assetRepo.DeleteAsset(ctx, 1)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, asset)
-}
-func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
-	ctx := context.Background()
-	var assetExpected domain.Asset
-	spec := json.RawMessage([]byte(`{"ram":"4GB","brand":"acer"}`))
-
-	dummy := &domain.Asset{
-		Name:          "Acer-255",
-		Category:      "Laptops",
-		InitCost:      50000,
-		Specification: &spec,
-	}
-
-	config.Init()
-	repository.InitDB()
-	db := repository.GetDB()
-
-	tx := db.MustBegin()
-	tx.MustExec("TRUNCATE TABLE assets RESTART IDENTITY;")
-	tx.Commit()
-
-	assetRepo := repository.NewAssetRepository()
-
-	asset, err := assetRepo.CreateAsset(ctx, dummy)
-
-	fmt.Println()
-	db.Get(&assetExpected, "SELECT * FROM assets WHERE id = $1", 1)
-	fmt.Println(assetExpected)
-
-	assert.Equal(t, &assetExpected, asset)
-	assert.Nil(t, err)
-
-	fmt.Println()
 }
 
 func TestAssetRepository_GetAsset_When_Success(t *testing.T) {

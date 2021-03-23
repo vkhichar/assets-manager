@@ -18,7 +18,7 @@ func TestFindAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
 	id := 100
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 
 	mockAssetRepo.On("FindAsset", ctx, id).Return(nil, errors.New("something went wrong"))
 
@@ -41,7 +41,7 @@ func TestFindAsset_When_ReturnsAsset(t *testing.T) {
 		InitCost: 100,
 		Status:   0,
 	}
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 
 	mockAssetRepo.On("FindAsset", ctx, id).Return(asset, nil)
 
@@ -55,7 +55,7 @@ func TestFindAsset_When_ReturnsAsset(t *testing.T) {
 
 func TestGetAssets__When_ReturnsError(t *testing.T) {
 
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 
 	mockAssetRepo.On("GetAllAssets").Return(nil, errors.New("something went wrong"))
 	assetService := service.NewAssetService(mockAssetRepo)
@@ -74,7 +74,7 @@ func TestGetAssets_When_ReturnsAssets(t *testing.T) {
 		assets[0] = domain.Asset{Id: i, Name: fmt.Sprintf("test_user%d", i), Category: "testing", InitCost: 0, Status: 0}
 	}
 
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 	mockAssetRepo.On("GetAllAssets").Return(assets, nil)
 	assetService := service.NewAssetService(mockAssetRepo)
 	assets_ret, err := assetService.GetAssets()
@@ -88,7 +88,7 @@ func TestUpdateAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
 
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 	var asset_req *contract.UpadateAssetRequest
 
 	mockAssetRepo.On("UpdateAsset", ctx, asset_req).Return(nil, errors.New("something went wrong"))
@@ -104,7 +104,7 @@ func TestUpdateAsset_When_ReturnsAsset(t *testing.T) {
 
 	ctx := context.Background()
 
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 	asset := &domain.Asset{Id: 1, Name: "test_user", Category: "testing", InitCost: 0, Status: 0}
 	var asset_req *contract.UpadateAssetRequest
 	mockAssetRepo.On("UpdateAsset", ctx, asset_req).Return(asset, nil)
@@ -122,7 +122,7 @@ func TestDeleteAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
 	id := 100
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 
 	mockAssetRepo.On("DeleteAsset", ctx, id).Return(nil, errors.New("something went wrong"))
 
@@ -147,7 +147,7 @@ func TestDeleteAsset_When_ReturnsAsset(t *testing.T) {
 		InitCost:      100,
 		Status:        0,
 	}
-	mockAssetRepo := &mockRepo.MockRepo{}
+	mockAssetRepo := &mockRepo.MockAssetRepo{}
 
 	mockAssetRepo.On("DeleteAsset", ctx, id).Return(asset, nil)
 
@@ -219,7 +219,7 @@ func TestAssetService_FindAsset_Returns_error(t *testing.T) {
 func TestAssetService_FindAsset_Returns_Success(t *testing.T) {
 	ctx := context.Background()
 	obj := domain.Asset{
-		ID:            1,
+		Id:            1,
 		Name:          "Ideapad",
 		Category:      "Laptop",
 		Status:        0,

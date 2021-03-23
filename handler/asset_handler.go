@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/custom_errors"
 	"github.com/vkhichar/assets-manager/domain"
@@ -15,10 +16,11 @@ import (
 func FindAssetHandler(service service.AssetService) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 
+		id := mux.Vars(r)["id"]
 		rw.Header().Set("content-type", "application/json")
 		//decode request
-		var req contract.FindAssetRequest
-		err := json.NewDecoder(r.Body).Decode(&req)
+		fmt.Println("id is ", id)
+		Id, err := strconv.Atoi(id)
 
 		if err != nil {
 
@@ -30,7 +32,7 @@ func FindAssetHandler(service service.AssetService) http.HandlerFunc {
 			return
 		}
 		//validate
-		if err = req.Validate(); err != nil {
+		if Id < 0 {
 			fmt.Println("error while validating request find asset", err.Error())
 			//bad request from client
 			responseBody, _ := json.Marshal(err.Error())
@@ -40,7 +42,7 @@ func FindAssetHandler(service service.AssetService) http.HandlerFunc {
 		}
 
 		//call service layer method
-		asset, err := service.FindAsset(r.Context(), req.Id)
+		asset, err := service.FindAsset(r.Context(), Id)
 		if err != nil {
 			fmt.Println("error while processing request for find asset", err.Error())
 			//internal server error
