@@ -13,13 +13,18 @@ type dependencies struct {
 var deps dependencies
 
 func InitDependencies() {
+
+	//user dependencies
 	userRepo := repository.NewUserRepository()
 	plainTokenService := service.NewPlainTokenService()
-
 	userService := service.NewUserService(userRepo, plainTokenService)
+
+	//asset depedencies
+	assetRepo := repository.NewAssetRepository()
+	assetEvServ := service.NewAssetEventService()
+	assetService := service.NewAssetService(assetRepo, assetEvServ)
+
+	deps.assetService = assetService
 	deps.userService = userService
 
-	assetRepo := repository.NewAssetRepository()
-	assetService := service.NewAssetService(assetRepo)
-	deps.assetService = assetService
 }

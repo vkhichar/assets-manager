@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -14,6 +15,9 @@ const (
 	registerUser        = "INSERT INTO users (name,email,password, is_admin) values ($1, $2, $3, $4)"
 	getUserByID         = "SELECT id, name, email, password, is_admin from users where id = $1"
 )
+
+var ErrDuplicateEmail = errors.New("this email is already registered")
+var ErrNoSqlRow = errors.New("no value for this id")
 
 type UserRepository interface {
 	FindUser(ctx context.Context, email string) (*domain.User, error)
@@ -53,7 +57,7 @@ func (repo *userRepo) InsertUser(ctx context.Context, name, email, password stri
 	err := repo.db.Get(&user, getUserByEmailQuery, email)
 
 	if err == nil {
-		return nil, nil
+		return nil, ErrDuplicateEmail
 	}
 	_, err = repo.db.Exec(registerUser, name, email, password, isAdmin)
 
@@ -74,7 +78,7 @@ func (repo *userRepo) GetUser(ctx context.Context, id int) (*domain.User, error)
 	if err == sql.ErrNoRows {
 		fmt.Printf("repository: couldn't find user for id: %d", id)
 
-		return nil, nil
+		return nil, ErrNoSqlRow
 	}
 
 	if err != nil {
