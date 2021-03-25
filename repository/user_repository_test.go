@@ -11,7 +11,7 @@ import (
 	"github.com/vkhichar/assets-manager/repository"
 )
 
-func TestDbConnection(t *testing.T) {
+func TestDBConnection(t *testing.T) {
 
 	os.Setenv("APP_PORT", "9000")
 	os.Setenv("DB_HOST", "localhost")
