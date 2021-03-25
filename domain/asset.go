@@ -3,7 +3,7 @@ package domain
 import "encoding/json"
 
 type Asset struct {
-	ID            int              `db:"id"`
+	Id            int              `db:"id"`
 	Name          string           `db:"name"`
 	Category      string           `db:"category"`
 	Specification *json.RawMessage `db:"specification"`
