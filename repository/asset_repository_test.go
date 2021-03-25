@@ -28,16 +28,12 @@ func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
 	repository.InitDB()
 	db := repository.GetDB()
 
-	tx := db.MustBegin()
-	tx.MustExec("TRUNCATE TABLE assets RESTART IDENTITY;")
-	tx.Commit()
-
 	assetRepo := repository.NewAssetRepository()
 
 	asset, err := assetRepo.CreateAsset(ctx, dummy)
 
 	fmt.Println()
-	db.Get(&assetExpected, "SELECT * FROM assets WHERE id = $1", 1)
+	db.Get(&assetExpected, "SELECT * FROM assets WHERE id = $1", asset.ID)
 	fmt.Println(assetExpected)
 
 	assert.Equal(t, &assetExpected, asset)
