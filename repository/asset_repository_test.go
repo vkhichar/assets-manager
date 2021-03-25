@@ -166,7 +166,7 @@ func TestAssetRepository_GetAsset_When_Success(t *testing.T) {
 	setConfigs()
 	ctx := context.Background()
 	var assetExpected domain.Asset
-	id := 1
+	id := 2
 
 	config.Init()
 	repository.InitDB()

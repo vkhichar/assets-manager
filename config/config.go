@@ -7,8 +7,10 @@ import (
 )
 
 type configs struct {
-	appPort  int
-	dbConfig DBConfig
+	appPort          int
+	dbConfig         DBConfig
+	assetServiceURL  string
+	assetServicePort int
 }
 
 type DBConfig struct {
@@ -31,6 +33,8 @@ func Init() error {
 
 	config.appPort = port
 	config.dbConfig = initDBConfig()
+	config.assetServiceURL = os.Getenv("ASSET_SERVICE_URL")
+	config.assetServicePort, _ = strconv.Atoi(os.Getenv("ASEET_SERVICE_PORT"))
 
 	return nil
 }
@@ -59,4 +63,12 @@ func GetAppPort() string {
 
 func GetDBConfig() DBConfig {
 	return config.dbConfig
+}
+
+func GetAssetServiceURL() string {
+	return config.assetServiceURL
+}
+
+func GetAssetServicePort() string {
+	return strconv.Itoa(config.assetServicePort)
 }

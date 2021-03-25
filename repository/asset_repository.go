@@ -43,7 +43,7 @@ func NewAssetRepository() AssetRepository {
 func (repo *assetRepo) FindAsset(context context.Context, id int) (*domain.Asset, error) {
 
 	var asset domain.Asset
-	err := repo.db.Get(&asset, FindAssetByIdQuery, id)
+	err := repo.db.Get(&asset, getAssetByIdQuery, id)
 	if err == sql.ErrNoRows {
 		return nil, custom_errors.InvalidIdError
 	}

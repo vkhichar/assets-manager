@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/vkhichar/assets-manager/config"
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
 )
@@ -43,7 +44,7 @@ func (assetEvSrv *assetEventService) PostCreateAssetEvent(ctx context.Context, a
 	reqReader := bytes.NewReader(requestBody)
 
 	//create a http request by using the bytes reader
-	req, err := http.NewRequest("POST", "http://localhost:"+"9035"+"/events", reqReader)
+	req, err := http.NewRequest("POST", config.GetAssetServiceURL()+config.GetAssetServicePort()+"/events", reqReader)
 
 	if err != nil {
 		fmt.Printf("Asset Event Service: Error during http request %s", err.Error())
