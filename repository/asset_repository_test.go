@@ -17,24 +17,19 @@ import (
 
 func TestDbConnection(t *testing.T) {
 
-	setConfigs()
+	os.Setenv("APP_PORT", "9000")
+	os.Setenv("DB_HOST", "localhost")
+	os.Setenv("DB_PORT", "5432")
+	os.Setenv("DB_USERNAME", "postgres")
+	os.Setenv("DB_PASSWORD", "12345")
+	os.Setenv("DB_NAME", "asset_management")
 
 	err := config.Init()
 	repository.InitDB()
 
 	assert.NoError(t, err)
 }
-
-func setConfigs() {
-	os.Setenv("APP_PORT", "9000")
-	os.Setenv("DB_HOST", "localhost")
-	os.Setenv("DB_PORT", "5432")
-	os.Setenv("DB_USERNAME", "postgres")
-	os.Setenv("DB_PASSWORD", "12345")
-	os.Setenv("DB_NAME", "assets_manager")
-}
 func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
-	setConfigs()
 	ctx := context.Background()
 	var assetExpected domain.Asset
 	spec := json.RawMessage([]byte(`{"ram":"4GB","brand":"acer"}`))
@@ -50,6 +45,10 @@ func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
 	repository.InitDB()
 	db := repository.GetDB()
 
+	//	tx := db.MustBegin()
+	//	tx.MustExec("TRUNCATE TABLE assets RESTART IDENTITY;")
+	//	tx.Commit()
+
 	assetRepo := repository.NewAssetRepository()
 
 	asset, err := assetRepo.CreateAsset(ctx, dummy)
@@ -64,7 +63,7 @@ func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
 	fmt.Println()
 }
 func TestFindAsset_When_ReturnsError(t *testing.T) {
-	setConfigs()
+
 	ctx := context.Background()
 
 	assetRepo := repository.NewAssetRepository()
@@ -78,7 +77,7 @@ func TestFindAsset_When_ReturnsError(t *testing.T) {
 }
 
 func TestFindAsset_When_ReturnsAsset(t *testing.T) {
-	setConfigs()
+
 	ctx := context.Background()
 
 	assetRepo := repository.NewAssetRepository()
@@ -89,7 +88,7 @@ func TestFindAsset_When_ReturnsAsset(t *testing.T) {
 }
 
 func TestGetAllAssets_When_ReturnsListOfAssets(t *testing.T) {
-	setConfigs()
+
 	assetRepo := repository.NewAssetRepository()
 	var expected_list []domain.Asset
 
@@ -100,7 +99,7 @@ func TestGetAllAssets_When_ReturnsListOfAssets(t *testing.T) {
 }
 
 func TestUpdateAssets_When_ReturnsError(t *testing.T) {
-	setConfigs()
+
 	ctx := context.Background()
 	assetRepo := repository.NewAssetRepository()
 
@@ -119,7 +118,7 @@ func TestUpdateAssets_When_ReturnsError(t *testing.T) {
 }
 
 func TestUpdateAssets_When_ReturnsAsset(t *testing.T) {
-	setConfigs()
+
 	ctx := context.Background()
 
 	asset_request := &contract.UpadateAssetRequest{
@@ -139,7 +138,7 @@ func TestUpdateAssets_When_ReturnsAsset(t *testing.T) {
 }
 
 func TestDeleteAssets_When_ReturnsError(t *testing.T) {
-	setConfigs()
+
 	ctx := context.Background()
 	assetRepo := repository.NewAssetRepository()
 
@@ -152,7 +151,7 @@ func TestDeleteAssets_When_ReturnsError(t *testing.T) {
 }
 
 func TestDeleteAssets_When_ReturnsAsset(t *testing.T) {
-	setConfigs()
+
 	ctx := context.Background()
 	assetRepo := repository.NewAssetRepository()
 
@@ -163,10 +162,9 @@ func TestDeleteAssets_When_ReturnsAsset(t *testing.T) {
 }
 
 func TestAssetRepository_GetAsset_When_Success(t *testing.T) {
-	setConfigs()
 	ctx := context.Background()
 	var assetExpected domain.Asset
-	id := 2
+	id := 1
 
 	config.Init()
 	repository.InitDB()
@@ -185,17 +183,17 @@ func TestAssetRepository_GetAsset_When_Success(t *testing.T) {
 	assert.Nil(t, err)
 	fmt.Println()
 }
+
 func TestAssetRepository_GetAsset_When_NoAssetFound(t *testing.T) {
-	setConfigs()
 	ctx := context.Background()
 	config.Init()
 	repository.InitDB()
 	assetRepo := repository.NewAssetRepository()
 
-	asset, err := assetRepo.FindAsset(ctx, 100)
+	asset, err := assetRepo.FindAsset(ctx, 5)
 
 	fmt.Println()
 	assert.Nil(t, asset)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	fmt.Println()
 }

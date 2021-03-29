@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
@@ -307,7 +306,7 @@ func TestGetAllAssets_When_InternalServerError(t *testing.T) {
 
 // 	id := 1
 
-// 	req, err := http.NewRequest("GET", "/assets/1", nil)
+// 	req, err := http.NewRequest("GET", "/assets/{id}", nil)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -340,43 +339,3 @@ func TestGetAllAssets_When_InternalServerError(t *testing.T) {
 // 	assert.JSONEq(t, string(expectedAsset), resp.Body.String())
 
 // }
-
-func TestFindAssetHandler_When_Success(t *testing.T) {
-	ctx := context.Background()
-
-	id := 1
-
-	req, err := http.NewRequest("GET", "/assets/1", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	resp := httptest.NewRecorder()
-
-	obj := domain.Asset{
-		Id:            1,
-		Name:          "Mi A1",
-		InitCost:      13000,
-		Category:      "Mobile",
-		Status:        0,
-		Specification: nil,
-	}
-
-	expectedAsset, _ := json.Marshal(contract.FindAssetResponse{
-		Id:            1,
-		Name:          "Mi A1",
-		InitCost:      13000,
-		Category:      "Mobile",
-		Status:        0,
-		Specification: nil,
-	})
-
-	mockAssetService := &mockService.MockAssetService{}
-	mockAssetService.On("FindAsset", ctx, id).Return(&obj, nil)
-
-	r := mux.NewRouter()
-	r.HandleFunc("/assets/{id}", handler.FindAssetHandler(mockAssetService)).Methods("GET")
-	r.ServeHTTP(resp, req)
-
-	assert.JSONEq(t, string(expectedAsset), resp.Body.String())
-
-}

@@ -44,7 +44,7 @@ func (assetEvSrv *assetEventService) PostCreateAssetEvent(ctx context.Context, a
 	reqReader := bytes.NewReader(requestBody)
 
 	//create a http request by using the bytes reader
-	req, err := http.NewRequest("POST", config.GetAssetServiceURL()+config.GetAssetServicePort()+"/events", reqReader)
+	req, err := http.NewRequest("POST", config.GetAssetServiceURL()+"/events", reqReader)
 
 	if err != nil {
 		fmt.Printf("Asset Event Service: Error during http request %s", err.Error())
@@ -70,6 +70,7 @@ func (assetEvSrv *assetEventService) PostCreateAssetEvent(ctx context.Context, a
 		fmt.Printf("Asset Event Service : error while converting into byte stream: %s", err.Error())
 		return "", err
 	}
+	defer response.Body.Close()
 
 	var respObj contract.CreateAssetEventResp
 
@@ -104,7 +105,7 @@ func (assetEvSrv *assetEventService) PostUpdateAssetEvent(ctx context.Context, a
 	reqReader := bytes.NewReader(requestBody)
 
 	//create a http request by using the bytes reader
-	req, err := http.NewRequest("POST", "http://localhost:"+"9035"+"/events", reqReader)
+	req, err := http.NewRequest("POST", config.GetAssetServiceURL()+"/events", reqReader)
 
 	if err != nil {
 		fmt.Printf("Asset Event Service: Error during http request %s", err.Error())
@@ -115,7 +116,7 @@ func (assetEvSrv *assetEventService) PostUpdateAssetEvent(ctx context.Context, a
 	var netClient = &http.Client{
 		Timeout: time.Second * 3, //set timeout
 	}
-
+	req.Header.Add("Content-type", "application/json")
 	//send the http request and get the http response
 	response, err := netClient.Do(req)
 
