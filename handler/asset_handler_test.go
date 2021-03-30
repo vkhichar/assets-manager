@@ -251,93 +251,91 @@ func TestGetAllAssets_When_InternalServerError(t *testing.T) {
 	assert.Equal(t, expected_error, rr.Body.String())
 }
 
-/*
-func TestGetAllAssets_When_Success(t *testing.T) {
+// func TestGetAllAssets_When_Success(t *testing.T) {
 
-	list_assets := make([]domain.Asset, 3)
+// 	list_assets := make([]domain.Asset, 3)
 
-	for i := 0; i < 3; i++ {
-		list_assets[i] = domain.Asset{Id: i, Name: fmt.Sprintf("test_user%d", i), Category: "testing", InitCost: 0, Status: 0}
-	}
+// 	for i := 0; i < 3; i++ {
+// 		list_assets[i] = domain.Asset{Id: i, Name: fmt.Sprintf("test_user%d", i), Category: "testing", InitCost: 0, Status: 0}
+// 	}
 
-	req, err := http.NewRequest("GET", "assets/all", nil)
+// 	req, err := http.NewRequest("GET", "assets/all", nil)
 
-	if err != nil {
-		t.Fatal()
-	}
+// 	if err != nil {
+// 		t.Fatal()
+// 	}
 
-	mockAssetService := &mockService.MockAssetService{}
-	mockAssetService.On("GetAssets").Return(list_assets, nil)
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handler.GetAllAssets(mockAssetService))
-	handler.ServeHTTP(rr, req)
-	m := make(map[string]interface{})
-	m["Assets"] = list_assets
+// 	mockAssetService := &mockService.MockAssetService{}
+// 	mockAssetService.On("GetAssets").Return(list_assets, nil)
+// 	rr := httptest.NewRecorder()
+// 	handler := http.HandlerFunc(handler.GetAllAssets(mockAssetService))
+// 	handler.ServeHTTP(rr, req)
+// 	m := make(map[string]interface{})
+// 	m["Assets"] = list_assets
 
-	expected_list, _ := json.Marshal(m)
-	assert.JSONEq(t, string(expected_list), rr.Body.String())
+// 	expected_list, _ := json.Marshal(m)
+// 	assert.JSONEq(t, string(expected_list), rr.Body.String())
 
-}
+// }
 
-func TestFindAssetHandler_When_InvalidId(t *testing.T) {
-	ctx := context.Background()
+// func TestFindAssetHandler_When_InvalidId(t *testing.T) {
+// 	ctx := context.Background()
 
-	id := 0
+// 	id := 0
 
-	req, err := http.NewRequest("GET", "/assets/0", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	resp := httptest.NewRecorder()
+// 	req, err := http.NewRequest("GET", "/assets/0", nil)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	resp := httptest.NewRecorder()
 
-	expectedErr := string(`{"error":"invalid id"}`)
+// 	expectedErr := string(`{"error":"invalid id"}`)
 
-	mockAssetService := mockService.MockAssetService{}
-	mockAssetService.On("FindAsset", ctx, id).Return(nil, errors.New("invalid id"))
-	handler := handler.FindAssetHandler(&mockAssetService)
+// 	mockAssetService := mockService.MockAssetService{}
+// 	mockAssetService.On("FindAsset", ctx, id).Return(nil, errors.New("invalid id"))
+// 	handler := handler.FindAssetHandler(&mockAssetService)
 
-	handler.ServeHTTP(resp, req)
+// 	handler.ServeHTTP(resp, req)
 
-	assert.Equal(t, expectedErr, resp.Body.String())
+// 	assert.Equal(t, expectedErr, resp.Body.String())
 
-}
+// }
 
-func TestFindAssetHandler_When_Success(t *testing.T) {
-	ctx := context.Background()
+// func TestFindAssetHandler_When_Success(t *testing.T) {
+// 	ctx := context.Background()
 
-	id := 1
+// 	id := 1
 
-	req, err := http.NewRequest("GET", "/assets/1", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	resp := httptest.NewRecorder()
+// 	req, err := http.NewRequest("GET", "/assets/{id}", nil)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	resp := httptest.NewRecorder()
 
-	obj := contract.CreateAssetResponse{
-		ID:            0,
-		Name:          "Mi A1",
-		InitCost:      13000,
-		Category:      "Mobile",
-		Status:        0,
-		Specification: nil,
-	}
+// 	obj := contract.CreateAssetResponse{
+// 		ID:            0,
+// 		Name:          "Mi A1",
+// 		InitCost:      13000,
+// 		Category:      "Mobile",
+// 		Status:        0,
+// 		Specification: nil,
+// 	}
 
-	expectedAsset, _ := json.Marshal(contract.CreateAssetResponse{
-		ID:            0,
-		Name:          "Mi A1",
-		InitCost:      13000,
-		Category:      "Mobile",
-		Status:        0,
-		Specification: nil,
-	})
+// 	expectedAsset, _ := json.Marshal(contract.CreateAssetResponse{
+// 		ID:            0,
+// 		Name:          "Mi A1",
+// 		InitCost:      13000,
+// 		Category:      "Mobile",
+// 		Status:        0,
+// 		Specification: nil,
+// 	})
 
-	mockAssetService := mockService.MockAssetService{}
-	mockAssetService.On("FindAsset", ctx, id).Return(&obj, nil)
-	handler := handler.FindAssetHandler(&mockAssetService)
+// 	mockAssetService := mockService.MockAssetService{}
+// 	mockAssetService.On("FindAsset", ctx, id).Return(&obj, nil)
+// 	handler := handler.FindAssetHandler(&mockAssetService)
 
-	handler.ServeHTTP(resp, req)
+// 	handler.ServeHTTP(resp, req)
 
-	assert.JSONEq(t, string(expectedAsset), resp.Body.String())
+// 	assert.JSONEq(t, string(expectedAsset), resp.Body.String())
 
-}
-*/
+// }

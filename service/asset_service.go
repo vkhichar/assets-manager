@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
@@ -20,13 +21,15 @@ type AssetService interface {
 }
 
 type assetService struct {
-	assetRepo repository.AssetRepository
+	assetRepo      repository.AssetRepository
+	assetEventServ AssetEventService
 }
 
-func NewAssetService(repo repository.AssetRepository) AssetService {
+func NewAssetService(repo repository.AssetRepository, event AssetEventService) AssetService {
 
 	return &assetService{
-		assetRepo: repo,
+		assetRepo:      repo,
+		assetEventServ: event,
 	}
 
 }
@@ -61,6 +64,12 @@ func (service *assetService) UpdateAsset(ctx context.Context, asset *contract.Up
 	if err != nil {
 		return nil, err
 	}
+	id, err := service.assetEventServ.PostUpdateAssetEvent(ctx, assets)
+	if err != nil {
+		fmt.Printf("asset service: error during post asset event: %s", err.Error())
+		return nil, err
+	}
+	fmt.Println("Id returned by EventService", id)
 	return assets, nil
 
 }
@@ -70,6 +79,12 @@ func (service *assetService) CreateAsset(ctx context.Context, asset *domain.Asse
 	if err != nil {
 		return nil, err
 	}
+	id, err := service.assetEventServ.PostCreateAssetEvent(ctx, asset)
+	if err != nil {
+		fmt.Printf("asset service: error during post asset event: %s", err.Error())
+		return nil, err
+	}
+	fmt.Println("Id returned by EventService", id)
 	return asset, nil
 }
 
