@@ -56,19 +56,28 @@ func TestGetUser_ReturnsSuccess(t *testing.T) {
 }
 
 func TestInsertUser_ReturnsSuccess(t *testing.T) {
+	//configEnvVars()
+	config.Init()
+	repository.InitDB()
+	db := repository.GetDB()
+
+	tx := db.MustBegin()
+	tx.MustExec("DELETE FROM users;")
+	tx.Commit()
+
 	userRepo := repository.NewUserRepository()
 
 	ctx := context.Background()
 
 	user := domain.User{
-		ID:       31,
+		ID:       1,
 		Name:     "sham",
 		Email:    "sham123@gmail.com",
 		Password: "sham",
 		IsAdmin:  false,
 	}
 	dbuser, err := userRepo.InsertUser(ctx, "sham", "sham123@gmail.com", "sham", false)
-
+	user.ID = dbuser.ID
 	assert.Nil(t, err)
 	assert.Equal(t, dbuser, &user)
 }

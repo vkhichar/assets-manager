@@ -49,5 +49,17 @@ func (m *MockUserRepo) GetUser(ctx context.Context, id int) (*domain.User, error
 }
 
 func (m *MockUserRepo) UpdateUser(ctx context.Context, id int, val contract.UpdateUserRequest) (*domain.User, error) {
-	return nil, nil
+	args := m.Called(ctx, id, val)
+
+	var user *domain.User
+	if args[0] != nil {
+		user = args[0].(*domain.User)
+	}
+
+	var err error
+	if args[1] != nil {
+		err = args[1].(error)
+	}
+
+	return user, err
 }

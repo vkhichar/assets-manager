@@ -10,7 +10,7 @@ func Routes() *mux.Router {
 	router.Handle("/ping", PingHandler())
 	router.Handle("/login", LoginHandler(deps.userService))
 	router.Handle("/users", CreateUserHandler(deps.userService)).Methods("POST")
-	router.Handle("/users", GetUser(deps.userService)).Methods("GET")
+	router.Handle("/users/{id}", GetUser(deps.userService)).Methods("GET")
 	router.Handle("/users/{id}", UpdateUserHandler(deps.userService)).Methods("PUT")
 
 	//asset routes

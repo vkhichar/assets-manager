@@ -121,8 +121,10 @@ func GetUser(userService service.UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
-		query := r.URL.Query().Get("id")
-		if len(query) == 0 {
+
+		idStrr := mux.Vars(r)["id"]
+		id, err := strconv.Atoi(idStrr)
+		if err != nil {
 			fmt.Printf("handler: no id provided")
 			w.WriteHeader(http.StatusBadRequest)
 			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: "No user id is provided"})
@@ -130,7 +132,6 @@ func GetUser(userService service.UserService) http.HandlerFunc {
 			return
 		}
 
-		id, _ := strconv.Atoi(query)
 		user, err := userService.GetUser(r.Context(), id)
 
 		if err != nil && err.Error() == service.ErrNoSqlRow.Error() {
