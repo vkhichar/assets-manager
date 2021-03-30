@@ -5,10 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
@@ -184,16 +186,17 @@ func TestCreateAssetHandler_When_Success(t *testing.T) {
 }
 func TestDeleteAssets_When_InternalServerError(t *testing.T) {
 
-	context := context.Background()
-
-	req, err := http.NewRequest("DELETE", "assets/delete?id=1", nil)
+	req, err := http.NewRequest("DELETE", "assets/{id}", nil)
 
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	vars := map[string]string{
+		"id": "1",
+	}
+	req = mux.SetURLVars(req, vars)
 	mockAssetService := &mockService.MockAssetService{}
-	mockAssetService.On("DeleteAsset", context, 1).Return(nil, errors.New("something went wrong"))
+	mockAssetService.On("DeleteAsset", req.Context(), 1).Return(nil, errors.New("something went wrong"))
 	expected_error := string(`{"error":"something went wrong"}`)
 
 	resp := httptest.NewRecorder()
@@ -205,8 +208,6 @@ func TestDeleteAssets_When_InternalServerError(t *testing.T) {
 
 func TestDeleteAssets_When_Success(t *testing.T) {
 
-	context := context.Background()
-
 	asset_expected := &domain.Asset{
 		Id:       1,
 		Name:     "hp",
@@ -214,14 +215,18 @@ func TestDeleteAssets_When_Success(t *testing.T) {
 		InitCost: 1000,
 		Status:   0,
 	}
-	req, err := http.NewRequest("DELETE", "asset/delete?id=1", nil)
+	req, err := http.NewRequest("DELETE", "assets/{id}", nil)
 
 	if err != nil {
 		t.Fatal(err)
 	}
+	vars := map[string]string{
+		"id": "1",
+	}
+	req = mux.SetURLVars(req, vars)
 
 	mockAssetService := &mockService.MockAssetService{}
-	mockAssetService.On("DeleteAsset", context, 1).Return(asset_expected, nil)
+	mockAssetService.On("DeleteAsset", req.Context(), 1).Return(asset_expected, nil)
 	expectedResp, _ := json.Marshal(asset_expected)
 
 	resp := httptest.NewRecorder()
@@ -233,7 +238,7 @@ func TestDeleteAssets_When_Success(t *testing.T) {
 
 func TestGetAllAssets_When_InternalServerError(t *testing.T) {
 
-	req, err := http.NewRequest("GET", "assets/all", nil)
+	req, err := http.NewRequest("GET", "assets", nil)
 
 	if err != nil {
 		t.Fatal()
@@ -251,7 +256,6 @@ func TestGetAllAssets_When_InternalServerError(t *testing.T) {
 	assert.Equal(t, expected_error, rr.Body.String())
 }
 
-/*
 func TestGetAllAssets_When_Success(t *testing.T) {
 
 	list_assets := make([]domain.Asset, 3)
@@ -260,7 +264,7 @@ func TestGetAllAssets_When_Success(t *testing.T) {
 		list_assets[i] = domain.Asset{Id: i, Name: fmt.Sprintf("test_user%d", i), Category: "testing", InitCost: 0, Status: 0}
 	}
 
-	req, err := http.NewRequest("GET", "assets/all", nil)
+	req, err := http.NewRequest("GET", "assets", nil)
 
 	if err != nil {
 		t.Fatal()
@@ -280,41 +284,47 @@ func TestGetAllAssets_When_Success(t *testing.T) {
 }
 
 func TestFindAssetHandler_When_InvalidId(t *testing.T) {
-	ctx := context.Background()
+	//ctx := context.Background()
 
-	id := 0
-
-	req, err := http.NewRequest("GET", "/assets/0", nil)
+	//	id := 0
+	req, err := http.NewRequest("GET", "/assets/{id}", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp := httptest.NewRecorder()
+	vars := map[string]string{
+		"id": "11",
+	}
+	req = mux.SetURLVars(req, vars)
 
 	expectedErr := string(`{"error":"invalid id"}`)
+	mockAssetService := &mockService.MockAssetService{}
+	mockAssetService.On("FindAsset", req.Context(), 11).Return(nil, errors.New("invalid id"))
+	rr := httptest.NewRecorder()
+	handler := handler.FindAssetHandler(mockAssetService)
 
-	mockAssetService := mockService.MockAssetService{}
-	mockAssetService.On("FindAsset", ctx, id).Return(nil, errors.New("invalid id"))
-	handler := handler.FindAssetHandler(&mockAssetService)
+	handler.ServeHTTP(rr, req)
 
-	handler.ServeHTTP(resp, req)
-
-	assert.Equal(t, expectedErr, resp.Body.String())
+	assert.Equal(t, expectedErr, rr.Body.String())
 
 }
 
 func TestFindAssetHandler_When_Success(t *testing.T) {
-	ctx := context.Background()
 
-	id := 1
+	//id := 1
 
-	req, err := http.NewRequest("GET", "/assets/1", nil)
+	req, err := http.NewRequest("GET", "/assets/{id}", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	vars := map[string]string{
+		"id": "11",
+	}
+	req = mux.SetURLVars(req, vars)
+
 	resp := httptest.NewRecorder()
 
-	obj := contract.CreateAssetResponse{
-		ID:            0,
+	obj := domain.Asset{
+		Id:            0,
 		Name:          "Mi A1",
 		InitCost:      13000,
 		Category:      "Mobile",
@@ -322,8 +332,8 @@ func TestFindAssetHandler_When_Success(t *testing.T) {
 		Specification: nil,
 	}
 
-	expectedAsset, _ := json.Marshal(contract.CreateAssetResponse{
-		ID:            0,
+	expectedAsset, _ := json.Marshal(contract.FindAssetResponse{
+		Id:            0,
 		Name:          "Mi A1",
 		InitCost:      13000,
 		Category:      "Mobile",
@@ -332,12 +342,11 @@ func TestFindAssetHandler_When_Success(t *testing.T) {
 	})
 
 	mockAssetService := mockService.MockAssetService{}
-	mockAssetService.On("FindAsset", ctx, id).Return(&obj, nil)
+	mockAssetService.On("FindAsset", req.Context(), 11).Return(&obj, nil)
 	handler := handler.FindAssetHandler(&mockAssetService)
 
 	handler.ServeHTTP(resp, req)
-
+	assert.Equal(t, http.StatusOK, resp.Code)
 	assert.JSONEq(t, string(expectedAsset), resp.Body.String())
 
 }
-*/
