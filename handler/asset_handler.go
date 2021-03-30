@@ -14,39 +14,41 @@ import (
 )
 
 func FindAssetHandler(service service.AssetService) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
 
-		id := mux.Vars(r)["id"]
+	return func(rw http.ResponseWriter, r *http.Request) {
+		fmt.Println(mux.Vars(r))
+
+		id, err := strconv.Atoi(mux.Vars(r)["id"])
 		rw.Header().Set("content-type", "application/json")
+
 		//decode request
 		fmt.Println("id is ", id)
-		Id, err := strconv.Atoi(id)
 
 		if err != nil {
 
 			fmt.Println("error while decoding request for Find asset ", err.Error())
 			//bad request from client
-			responseBody, _ := json.Marshal(err.Error())
+			responseBody, _ := json.Marshal(contract.ErrorResponse{Error: err.Error()})
 			rw.WriteHeader(http.StatusBadRequest)
 			rw.Write(responseBody)
 			return
 		}
 		//validate
-		if Id < 0 {
+		if id < 0 {
 			fmt.Println("error while validating request find asset", err.Error())
 			//bad request from client
-			responseBody, _ := json.Marshal(err.Error())
+			responseBody, _ := json.Marshal(contract.ErrorResponse{Error: err.Error()})
 			rw.WriteHeader(http.StatusBadRequest)
 			rw.Write(responseBody)
 			return
 		}
 
 		//call service layer method
-		asset, err := service.FindAsset(r.Context(), Id)
+		asset, err := service.FindAsset(r.Context(), id)
 		if err != nil {
 			fmt.Println("error while processing request for find asset", err.Error())
 			//internal server error
-			responseBytes, _ := json.Marshal(err.Error())
+			responseBytes, _ := json.Marshal(contract.ErrorResponse{Error: err.Error()})
 			rw.WriteHeader(http.StatusInternalServerError)
 			rw.Write(responseBytes)
 			return
@@ -145,10 +147,7 @@ func DeleteAssets(service service.AssetService) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 
 		//validate request
-		query := r.URL.Query()
-		data := query.Get("id")
-
-		id, err := strconv.Atoi(data)
+		id, err := strconv.Atoi(mux.Vars(r)["id"])
 
 		if err != nil || id < 0 {
 			//Bad Request

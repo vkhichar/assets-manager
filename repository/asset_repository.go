@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/custom_errors"
@@ -12,8 +13,8 @@ import (
 )
 
 const (
-	FindAssetByIdQuery = "SELECT id,name,specification,category,init_cost,status FROM assets WHERE id = $1"
-	GetAllAssetsQuery  = "SELECT id,name,specification,category,init_cost,status FROM assets"
+	FindAssetByIdQuery = "SELECT id,name,category,specification,init_cost,status FROM assets WHERE id = $1"
+	GetAllAssetsQuery  = "SELECT id,name,category,specification,init_cost,status FROM assets"
 	UpdateAssetsQuery  = "UPDATE assets SET name=$2, category=$3, specification=$4,init_cost=$5,status=$6 WHERE id=$1"
 	DeleteAssetQuery   = "DELETE FROM assets WHERE ID=$1"
 )
@@ -44,7 +45,9 @@ func (repo *assetRepo) FindAsset(context context.Context, id int) (*domain.Asset
 
 	var asset domain.Asset
 	err := repo.db.Get(&asset, FindAssetByIdQuery, id)
+
 	if err == sql.ErrNoRows {
+		fmt.Println(err.Error())
 		return nil, custom_errors.InvalidIdError
 	}
 	if err != nil {

@@ -3,7 +3,6 @@ package contract
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -23,8 +22,9 @@ func (req CreateAssetRequest) Validate() error {
 		return errors.New("category is required")
 	}
 
-	if strings.TrimSpace(fmt.Sprintf("%f", req.InitCost)) == "" {
-		return errors.New("Init cost is required")
+	if req.InitCost < 0 {
+		return errors.New("Init cost is Invalid")
 	}
+
 	return nil
 }

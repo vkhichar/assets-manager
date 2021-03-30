@@ -3,7 +3,7 @@ CREATE TABLE allocations(
 	user_id INT,
 	asset_id INT,
 	date_alloc DATE NOT NULL,
-	date_dealloc DATE NOT NULL,
+	date_dealloc DATE,
 
 	FOREIGN KEY(user_id) 
 	REFERENCES users(id)

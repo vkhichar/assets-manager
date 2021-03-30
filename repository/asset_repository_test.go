@@ -15,15 +15,17 @@ import (
 	"github.com/vkhichar/assets-manager/repository"
 )
 
-func TestDbConnection(t *testing.T) {
-
+func configEnvVars() {
 	os.Setenv("APP_PORT", "9000")
 	os.Setenv("DB_HOST", "localhost")
 	os.Setenv("DB_PORT", "5432")
 	os.Setenv("DB_USERNAME", "postgres")
 	os.Setenv("DB_PASSWORD", "12345")
 	os.Setenv("DB_NAME", "asset_management")
+}
+func TestDbConnection(t *testing.T) {
 
+	configEnvVars()
 	err := config.Init()
 	repository.InitDB()
 
@@ -40,20 +42,21 @@ func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
 		InitCost:      50000,
 		Specification: &spec,
 	}
-
+	configEnvVars()
 	config.Init()
 	repository.InitDB()
 	db := repository.GetDB()
 
-	//	tx := db.MustBegin()
-	//	tx.MustExec("TRUNCATE TABLE assets RESTART IDENTITY;")
-	//	tx.Commit()
+	tx := db.MustBegin()
+	tx.MustExec("DELETE FROM allocations")
+	tx.MustExec("DELETE FROM assets;")
+	tx.Commit()
 
 	assetRepo := repository.NewAssetRepository()
 
 	asset, err := assetRepo.CreateAsset(ctx, dummy)
 
-	fmt.Println()
+	fmt.Println(err)
 	db.Get(&assetExpected, "SELECT * FROM assets WHERE id = $1", asset.Id)
 	fmt.Println(assetExpected)
 
@@ -65,6 +68,9 @@ func TestAssetRepository_CreateAsset_When_Success(t *testing.T) {
 func TestFindAsset_When_ReturnsError(t *testing.T) {
 
 	ctx := context.Background()
+	configEnvVars()
+	config.Init()
+	repository.InitDB()
 
 	assetRepo := repository.NewAssetRepository()
 
@@ -78,28 +84,36 @@ func TestFindAsset_When_ReturnsError(t *testing.T) {
 
 func TestFindAsset_When_ReturnsAsset(t *testing.T) {
 
-	ctx := context.Background()
+	configEnvVars()
+	config.Init()
+	repository.InitDB()
+	db := repository.GetDB()
+
+	tx := db.MustBegin()
+	tx.MustExec("DELETE FROM assets;")
+	tx.Commit()
+
+	db.Query("INSERT INTO ASSETS(id,name,category,init_cost,status) VALUES(1,'Test','Test',1000,0)")
 
 	assetRepo := repository.NewAssetRepository()
-	asset, err := assetRepo.FindAsset(ctx, 1)
+	asset, err := assetRepo.FindAsset(context.Background(), 1)
 
+	expectedAsset := domain.Asset{
+		Id:       1,
+		Name:     "Test",
+		Category: "Test",
+		InitCost: 1000,
+		Status:   0,
+	}
 	assert.NoError(t, err)
 	assert.NotNil(t, asset)
-}
-
-func TestGetAllAssets_When_ReturnsListOfAssets(t *testing.T) {
-
-	assetRepo := repository.NewAssetRepository()
-	var expected_list []domain.Asset
-
-	returned_list, err := assetRepo.GetAllAssets()
-
-	assert.NoError(t, err)
-	assert.IsType(t, expected_list, returned_list)
+	assert.Equal(t, &expectedAsset, asset)
 }
 
 func TestUpdateAssets_When_ReturnsError(t *testing.T) {
-
+	configEnvVars()
+	config.Init()
+	repository.InitDB()
 	ctx := context.Background()
 	assetRepo := repository.NewAssetRepository()
 
@@ -119,7 +133,13 @@ func TestUpdateAssets_When_ReturnsError(t *testing.T) {
 
 func TestUpdateAssets_When_ReturnsAsset(t *testing.T) {
 
+	configEnvVars()
+	config.Init()
+	repository.InitDB()
+	db := repository.GetDB()
 	ctx := context.Background()
+
+	db.Query("INSERT INTO ASSETS(id,name,category,init_cost,status) VALUES(1,'TEST','TEST',1000,0)")
 
 	asset_request := &contract.UpadateAssetRequest{
 		Id:       1,
@@ -138,7 +158,9 @@ func TestUpdateAssets_When_ReturnsAsset(t *testing.T) {
 }
 
 func TestDeleteAssets_When_ReturnsError(t *testing.T) {
-
+	configEnvVars()
+	config.Init()
+	repository.InitDB()
 	ctx := context.Background()
 	assetRepo := repository.NewAssetRepository()
 
@@ -152,7 +174,14 @@ func TestDeleteAssets_When_ReturnsError(t *testing.T) {
 
 func TestDeleteAssets_When_ReturnsAsset(t *testing.T) {
 
+	configEnvVars()
+	config.Init()
+	repository.InitDB()
+	db := repository.GetDB()
 	ctx := context.Background()
+
+	db.Query("INSERT INTO ASSETS(id,name,category,init_cost,status) VALUES(1,'TEST','TEST',1000,0)")
+
 	assetRepo := repository.NewAssetRepository()
 
 	asset, err := assetRepo.DeleteAsset(ctx, 1)
@@ -160,22 +189,51 @@ func TestDeleteAssets_When_ReturnsAsset(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, asset)
 }
+func TestGetAllAssets_When_ReturnsListOfAssets(t *testing.T) {
 
+	configEnvVars()
+	config.Init()
+	repository.InitDB()
+	assetRepo := repository.NewAssetRepository()
+	db := repository.GetDB()
+
+	tx := db.MustBegin()
+	tx.MustExec("DELETE FROM assets;")
+	tx.Commit()
+
+	db.Query("INSERT INTO ASSETS(id,name,category,init_cost,status) VALUES(0,'TEST0','TEST0',1000,0)")
+	db.Query("INSERT INTO ASSETS(id,name,category,init_cost,status) VALUES(1,'TEST1','TEST1',1000,0)")
+	db.Query("INSERT INTO ASSETS(id,name,category,init_cost,status) VALUES(2,'TEST2','TEST2',1000,0)")
+
+	var expectedList = make([]domain.Asset, 3)
+	for i := 0; i < 3; i++ {
+		expectedList[i] = domain.Asset{Id: i, Name: fmt.Sprintf("TEST%d", i), Category: fmt.Sprintf("TEST%d", i), InitCost: 1000, Status: 0}
+	}
+
+	returnedList, err := assetRepo.GetAllAssets()
+
+	assert.NoError(t, err)
+	assert.IsType(t, expectedList, returnedList)
+	assert.Equal(t, expectedList, returnedList)
+}
+
+/*
 func TestAssetRepository_GetAsset_When_Success(t *testing.T) {
-	ctx := context.Background()
-	var assetExpected domain.Asset
-	id := 1
 
 	config.Init()
 	repository.InitDB()
 	db := repository.GetDB()
+	ctx := context.Background()
+
+	db.Query("INSERT INTO ASSETS(id,name,category,init_cost,status) VALUES(1,'TEST','TEST',1000,0)")
+	var assetExpected domain.Asset
 
 	assetRepo := repository.NewAssetRepository()
 
-	asset, err := assetRepo.FindAsset(ctx, id)
+	asset, err := assetRepo.FindAsset(ctx, 1)
 
 	fmt.Println()
-	db.Get(&assetExpected, "SELECT * FROM assets WHERE id = $1", id)
+	db.Get(&assetExpected, "SELECT * FROM assets WHERE id = $1", 1)
 	fmt.Println(assetExpected)
 
 	assert.NotNil(t, asset)
@@ -186,14 +244,17 @@ func TestAssetRepository_GetAsset_When_Success(t *testing.T) {
 
 func TestAssetRepository_GetAsset_When_NoAssetFound(t *testing.T) {
 	ctx := context.Background()
+
 	config.Init()
 	repository.InitDB()
+
 	assetRepo := repository.NewAssetRepository()
 
 	asset, err := assetRepo.FindAsset(ctx, 5)
 
 	fmt.Println()
+	assert.Error(t, err)
 	assert.Nil(t, asset)
-	assert.Nil(t, err)
 	fmt.Println()
 }
+*/
