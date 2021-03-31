@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"testing"
 
@@ -45,16 +46,14 @@ func TestCreateUserEvent_ReturnError(t *testing.T) {
 		Password: "jay",
 		IsAdmin:  false,
 	}
-	expErr := string(`{"error":"event unsuccessful"}`)
 
 	gock.New("http://localhost:9035").
 		Post("/events").
-		Reply(400).
-		JSON(map[string]string{"error": "event unsuccessful"})
+		ReplyError(errors.New("user not created"))
 
-	id, err := eventService.CreateUserEvent(ctx, &user)
-	assert.Nil(t, err)
-	assert.JSONEq(t, expErr, id)
+	_, err := eventService.CreateUserEvent(ctx, &user)
+	assert.NotNil(t, err)
+	//assert.JSONEq(t, expErr, id)
 }
 
 func TestUpdateUserEvent_ReturnSuccess(t *testing.T) {
@@ -91,14 +90,11 @@ func TestUpdateUserEvent_ReturnError(t *testing.T) {
 		Password: "jay",
 		IsAdmin:  false,
 	}
-	expErr := string(`{"error":"event unsuccessful"}`)
 
 	gock.New("http://localhost:9035").
 		Post("/events").
-		Reply(400).
-		JSON(map[string]string{"error": "event unsuccessful"})
+		ReplyError(errors.New("user not updated"))
 
-	id, err := eventService.CreateUserEvent(ctx, &user)
-	assert.Nil(t, err)
-	assert.JSONEq(t, expErr, id)
+	_, err := eventService.CreateUserEvent(ctx, &user)
+	assert.NotNil(t, err)
 }
