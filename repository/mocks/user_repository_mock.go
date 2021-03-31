@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/stretchr/testify/mock"
+	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
 )
 
@@ -33,6 +34,22 @@ func (m *MockUserRepo) InsertUser(ctx context.Context, name, email, password str
 
 func (m *MockUserRepo) GetUser(ctx context.Context, id int) (*domain.User, error) {
 	args := m.Called(ctx, id)
+
+	var user *domain.User
+	if args[0] != nil {
+		user = args[0].(*domain.User)
+	}
+
+	var err error
+	if args[1] != nil {
+		err = args[1].(error)
+	}
+
+	return user, err
+}
+
+func (m *MockUserRepo) UpdateUser(ctx context.Context, id int, val contract.UpdateUserRequest) (*domain.User, error) {
+	args := m.Called(ctx, id, val)
 
 	var user *domain.User
 	if args[0] != nil {

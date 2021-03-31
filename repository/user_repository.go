@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
 )
 
@@ -14,6 +15,7 @@ const (
 	getUserByEmailQuery = "SELECT id, name, email, password, is_admin FROM users WHERE email= $1"
 	registerUser        = "INSERT INTO users (name,email,password, is_admin) values ($1, $2, $3, $4)"
 	getUserByID         = "SELECT id, name, email, password, is_admin from users where id = $1"
+	updateUserById      = "UPDATE users SET name = $1, email = $2, password = $3, is_admin = $4 WHERE id = $5"
 )
 
 var ErrDuplicateEmail = errors.New("this email is already registered")
@@ -23,6 +25,7 @@ type UserRepository interface {
 	FindUser(ctx context.Context, email string) (*domain.User, error)
 	InsertUser(ctx context.Context, name, email, password string, isAdmin bool) (*domain.User, error)
 	GetUser(ctx context.Context, id int) (*domain.User, error)
+	UpdateUser(ctx context.Context, id int, val contract.UpdateUserRequest) (*domain.User, error)
 }
 
 type userRepo struct {
@@ -81,6 +84,22 @@ func (repo *userRepo) GetUser(ctx context.Context, id int) (*domain.User, error)
 		return nil, ErrNoSqlRow
 	}
 
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (repo *userRepo) UpdateUser(ctx context.Context, id int, val contract.UpdateUserRequest) (*domain.User, error) {
+	var user domain.User
+
+	_, err := repo.db.Exec(updateUserById, val.Name, val.Email, val.Password, val.IsAdmin, id)
+
+	if err != nil {
+		return nil, err
+	}
+	err = repo.db.Get(&user, getUserByID, id)
 	if err != nil {
 		return nil, err
 	}

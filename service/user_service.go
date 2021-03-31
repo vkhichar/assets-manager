@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
 	"github.com/vkhichar/assets-manager/repository"
 )
@@ -16,17 +17,20 @@ type UserService interface {
 	Login(ctx context.Context, email, password string) (user *domain.User, token string, err error)
 	Register(ctx context.Context, name, email, password string, isAdmin bool) (user *domain.User, err error)
 	GetUser(ctx context.Context, id int) (*domain.User, error)
+	Update(ctx context.Context, id int, val contract.UpdateUserRequest) (*domain.User, error)
 }
 
 type userService struct {
 	userRepo repository.UserRepository
 	tokenSvc TokenService
+	eventSvc EventService
 }
 
-func NewUserService(repo repository.UserRepository, ts TokenService) UserService {
+func NewUserService(repo repository.UserRepository, ts TokenService, es EventService) UserService {
 	return &userService{
 		userRepo: repo,
 		tokenSvc: ts,
+		eventSvc: es,
 	}
 }
 
@@ -63,6 +67,7 @@ func (service *userService) Register(ctx context.Context, name, email, password 
 	if err != nil {
 		return nil, err
 	}
+	service.eventSvc.CreateUserEvent(ctx, user)
 
 	return user, nil
 }
@@ -78,5 +83,14 @@ func (service *userService) GetUser(ctx context.Context, id int) (*domain.User, 
 		return nil, err
 	}
 
+	return user, nil
+}
+
+func (service *userService) Update(ctx context.Context, id int, val contract.UpdateUserRequest) (*domain.User, error) {
+	user, err := service.userRepo.UpdateUser(ctx, id, val)
+	if err != nil {
+		return nil, err
+	}
+	service.eventSvc.UpdateUserEvent(ctx, user)
 	return user, nil
 }

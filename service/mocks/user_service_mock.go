@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/stretchr/testify/mock"
+	"github.com/vkhichar/assets-manager/contract"
 	"github.com/vkhichar/assets-manager/domain"
 )
 
@@ -45,4 +46,8 @@ func (m *MockUserService) GetUser(ctx context.Context, id int) (*domain.User, er
 	}
 
 	return user, err
+}
+
+func (m *MockUserService) Update(ctx context.Context, id int, val contract.UpdateUserRequest) (*domain.User, error) {
+	return nil, nil
 }

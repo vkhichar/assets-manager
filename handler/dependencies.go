@@ -17,7 +17,10 @@ func InitDependencies() {
 	//user dependencies
 	userRepo := repository.NewUserRepository()
 	plainTokenService := service.NewPlainTokenService()
-	userService := service.NewUserService(userRepo, plainTokenService)
+	eventService := service.NewEventService()
+
+	userService := service.NewUserService(userRepo, plainTokenService, eventService)
+	deps.userService = userService
 
 	//asset depedencies
 	assetRepo := repository.NewAssetRepository()
